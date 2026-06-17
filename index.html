@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Financial Calculator</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      min-height: 100vh;
+      padding: 30px 20px;
+      color: white;
+    }
+    .container { max-width: 650px; margin: 0 auto; }
+    h1 { text-align: center; font-size: 2rem; margin-bottom: 30px; }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+    .tab {
+      padding: 10px 20px;
+      border-radius: 25px;
+      border: 1px solid rgba(255,255,255,0.3);
+      background: transparent;
+      color: rgba(255,255,255,0.7);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab.active {
+      background: #e94560;
+      color: white;
+      border-color: #e94560;
+      font-weight: 500;
+    }
+    .calc { display: none; }
+    .calc.active { display: block; }
+    .card {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .row { margin-bottom: 20px; }
+    .row label {
+      display: block;
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 8px;
+    }
+    .row-inline {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .row-inline input[type=range] {
+      flex: 1;
+      accent-color: #e94560;
+    }
+    .val {
+      font-size: 14px;
+      font-weight: 500;
+      min-width: 90px;
+      text-align: right;
+      color: white;
+    }
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,0.15);
+      margin: 25px 0;
+    }
+    .results {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+    }
+    .rcard {
+      background: rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+    }
+    .rcard p {
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 6px;
+    }
+    .rcard h3 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: white;
+    }
+    .rcard h3.green { color: #2b9348; }
+    .rcard h3.amber { color: #f4a261; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Financial Calculator 💰</h1>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('emi')">EMI</button>
+      <button class="tab" onclick="switchTab('sip')">SIP</button>
+      <button class="tab" onclick="switchTab('lumpsum')">Lump Sum</button>
+      <button class="tab" onclick="switchTab('fd')">FD / RD</button>
+    </div>
+
+    <div class="card">
+
+      <div class="calc active" id="emi">
+        <div class="row">
+          <label>Loan amount (₹)</label>
+          <div class="row-inline">
+            <input type="range" min="100000" max="10000000" step="50000" value="1000000" oninput="updateEMI()" id="eLoan">
+            <span class="val" id="eLoanV">₹10,00,000</span>
+          </div>
+        </div>
+        <div class="row">
+          <label>Annual interest rate (%)</label>
+          <div class="row-inline">
+            <input type="range" min="1" max="20" step="0.1" value="8.5" oninput="updateEMI()" id="eRate">
+            <span class="val" id="eRateV">8.5%</span>
+          </div>
+        </div>
+        <div class="row">
+          <label>Loan tenure (years)</label>
+          <div class="row-inline">
+            <input type="range" min="1" max="30" step="1" value="10" oninput="updateEMI()" id="eTenure">
+            <span class="val" id="eTenureV">10 yrs</span>
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="results">
+          <div class="rcard"><p>Monthly EMI</p><h3 class="green" id="eEMI">₹12,399</h3></div>
+          <div class="rcard"><p>Total interest</p><h3 class="amber" id="eInterest">₹4,87,880</h3></div>
+          <div class="rcard"><p>Total payment</p><h3 id="eTotal">₹14,87,880</h3></div>
+        </div>
+      </div>
+
+      <div class="calc" id="sip">
+        <div class="row">
+          <label>Monthly investment (₹)</label>
+          <div class="row-inline">
+            <input type="range" min="500" max="100000" step="500" value="5000" oninput="updateSIP()" id="sAmt">
+            <span class="val" id="sAmtV">₹5,000</span>
+          </div>
+        </div>
+        <div class="row">
+          <label>Expected annual return (%)</label>
+          <div class="row-inline">
+            <input type="range" min="1" max="30" step="0.5" value="12" oninput="updateSIP()" id="sRate">
+            <span class="val" id="sRateV">12%</span>
+          </div>
+        </div>
+        <div class="row">
+          <label>Investment period (years)</label>
+          <div class="row-inline">
+            <input type="range" min="1" max="40" step="1" value="10" oninput="updateSIP()" id="sTenure">
+            <span class="val" id="sTenureV">10 yrs</span>
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="results">
+          <div class="rcard"><p>Invested amount</p><h3 id="sInvested">₹6,00,000</h3></div>
+          <div class="rcard"><p>Estimated returns</p><h3 class="green" id="sReturns">₹5,61,695</h3></div>
+          <div class="rcard"><p>Total value</p><h3 class="green" id="sTotal">₹11,61,695</h3></div>
+        </div>
+      </div>
+
+      <div class="calc" id="lumpsum">
+        <div class="row">
+          <label>Investment amount (₹)</label>
+          <div class="row-inline">
+            <input type="range" min="10000" max="5000000" step="10000" value="100000" oninput="updateLS()" id="lAmt">
+            <span class="val" id="lAmtV">₹1,00,000</span>
+          </div>
+        </div>
+        <div class="row">
+          <label>Expected annual return (%)</label>
+          <div class="row-inline">
+            <input type="range" min="1" max="30" step="0.5" value="12" oninput="updateLS()" id="lRate">
+            <span class="val" id="lRateV">12%</span>
+          </div>
+        </div>
+        <div class="row">
+          <label>Investment period (years)</label>
+          <div class="row-inline">
+            <input type="range" min="1" max="40" step="1" value="10" oninput="updateLS()" id="lTenure">
+            <span class="val" id="lTenureV">10 yrs</span>
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="results">
+          <div class="rcard"><p>Invested amount</p><h3 id="lInvested">₹1,00,000</h3></div>
+          <div class="rcard"><p>Estimated returns</p><h3 class="green" id="lReturns">₹2,10,585</h3></div>
+          <div class="rcard"><p>Total value</p><h3 class="green" id="lTotal">₹3,10,585</h3></div>
+        </div>
+      </div>
+
+      <div class="calc" id="fd">
+        <div class="row">
+          <label>Principal amount (₹)</label>
+          <div class="row-inline">
+            <input type="range" min="10000" max="5000000" step="10000" value="100000" oninput="updateFD()" id="fAmt">
+            <span class="val" id="fAmtV">₹1,00,000</span>
+          </div>
+        </div>
+        <div class="row">
+          <label>Annual interest rate (%)</label>
+          <div class="row-inline">
+            <input type="range" min="1" max="15" step="0.1" value="7" oninput="updateFD()" id="fRate">
+            <span class="val" id="fRateV">7%</span>
+          </div>
+        </div>
+        <div class="row">
+          <label>Tenure (years)</label>
+          <div class="row-inline">
+            <input type="range" min="1" max="10" step="1" value="3" oninput="updateFD()" id="fTenure">
+            <span class="val" id="fTenureV">3 yrs</span>
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="results">
+          <div class="rcard"><p>Principal</p><h3 id="fPrincipal">₹1,00,000</h3></div>
+          <div class="rcard"><p>Interest earned</p><h3 class="green" id="fInterest">₹22,504</h3></div>
+          <div class="rcard"><p>Maturity value</p><h3 class="green" id="fMaturity">₹1,22,504</h3></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function fmt(n) { return '₹' + Math.round(n).toLocaleString('en-IN'); }
+
+    function switchTab(id) {
+      document.querySelectorAll('.tab').forEach((t,i) => {
+        t.classList.toggle('active', ['emi','sip','lumpsum','fd'][i] === id);
+      });
+      document.querySelectorAll('.calc').forEach(c => {
+        c.classList.toggle('active', c.id === id);
+      });
+    }
+
+    function updateEMI() {
+      var P = +document.getElementById('eLoan').value;
+      var r = +document.getElementById('eRate').value / 1200;
+      var n = +document.getElementById('eTenure').value * 12;
+      document.getElementById('eLoanV').textContent = fmt(P);
+      document.getElementById('eRateV').textContent = (+document.getElementById('eRate').value).toFixed(1) + '%';
+      document.getElementById('eTenureV').textContent = document.getElementById('eTenure').value + ' yrs';
+      var emi = P * r * Math.pow(1+r,n) / (Math.pow(1+r,n)-1);
+      var total = emi * n;
+      document.getElementById('eEMI').textContent = fmt(emi);
+      document.getElementById('eInterest').textContent = fmt(total - P);
+      document.getElementById('eTotal').textContent = fmt(total);
+    }
+
+    function updateSIP() {
+      var m = +document.getElementById('sAmt').value;
+      var r = +document.getElementById('sRate').value / 1200;
+      var n = +document.getElementById('sTenure').value * 12;
+      document.getElementById('sAmtV').textContent = fmt(m);
+      document.getElementById('sRateV').textContent = (+document.getElementById('sRate').value).toFixed(1) + '%';
+      document.getElementById('sTenureV').textContent = document.getElementById('sTenure').value + ' yrs';
+      var invested = m * n;
+      var total = m * (Math.pow(1+r,n)-1) * (1+r) / r;
+      document.getElementById('sInvested').textContent = fmt(invested);
+      document.getElementById('sReturns').textContent = fmt(total - invested);
+      document.getElementById('sTotal').textContent = fmt(total);
+    }
+
+    function updateLS() {
+      var P = +document.getElementById('lAmt').value;
+      var r = +document.getElementById('lRate').value / 100;
+      var n = +document.getElementById('lTenure').value;
+      document.getElementById('lAmtV').textContent = fmt(P);
+      document.getElementById('lRateV').textContent = (+document.getElementById('lRate').value).toFixed(1) + '%';
+      document.getElementById('lTenureV').textContent = n + ' yrs';
+      var total = P * Math.pow(1+r, n);
+      document.getElementById('lInvested').textContent = fmt(P);
+      document.getElementById('lReturns').textContent = fmt(total - P);
+      document.getElementById('lTotal').textContent = fmt(total);
+    }
+
+    function updateFD() {
+      var P = +document.getElementById('fAmt').value;
+      var r = +document.getElementById('fRate').value / 100;
+      var n = +document.getElementById('fTenure').value;
+      document.getElementById('fAmtV').textContent = fmt(P);
+      document.getElementById('fRateV').textContent = (+document.getElementById('fRate').value).toFixed(1) + '%';
+      document.getElementById('fTenureV').textContent = n + ' yrs';
+      var total = P * Math.pow(1 + r/4, 4*n);
+      document.getElementById('fPrincipal').textContent = fmt(P);
+      document.getElementById('fInterest').textContent = fmt(total - P);
+      document.getElementById('fMaturity').textContent = fmt(total);
+    }
+
+    updateEMI(); updateSIP(); updateLS(); updateFD();
+  </script>
+</body>
+</html>
